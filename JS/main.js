@@ -2,30 +2,37 @@ const cells = 101
 
 // From 0.001 to 100
 const items = [
-  {name: '10000', img: 'IMG/case/10000.png', chance: 1},
-  {name: '5000', img: 'IMG/case/5000.png', chance: 2},
-  {name: '1000', img: 'IMG/case/1000.png', chance: 3},
-  {name: '500', img: 'IMG/case/500.png', chance: 4},
-  {name: '100', img: 'IMG/case/100.png', chance: 5},
-  {name: 'Orbit', img: 'IMG/case/orbit.png', chance: 8},
-  {name: 'Snickers', img: 'IMG/case/snickers.png', chance: 9},
-  {name: 'Energy', img: 'IMG/case/energy.png', chance: 10},
-  {name: 'Suhari', img: 'IMG/case/suhari.png', chance: 11},
+  {name: '10000', img: 'IMG/case/10000.png', chance: 2},
+  {name: '5000', img: 'IMG/case/5000.png', chance: 4},
+  {name: '1000', img: 'IMG/case/1000.png', chance: 0.4},
+  {name: '500', img: 'IMG/case/500.png', chance: 0.5},
+  {name: '100', img: 'IMG/case/100.png', chance: 0.8},
+  {name: 'Energy', img: 'IMG/case/energy.png', chance: 3},
+  {name: 'Suhari', img: 'IMG/case/suhari.png', chance: 6},
+  {name: 'Snickers', img: 'IMG/case/snickers.png', chance: 5},
+  {name: 'Orbit', img: 'IMG/case/orbit.png', chance: 6},
   {name: 'Nothing', img: 'IMG/case/nothing.png', chance: 90}
 ]
 
-function getItem() {
+function getItem(excludeHighValue = false) {
   let item;
+  let totalChance = items.reduce((sum, elm) => sum + elm.chance, 0);
 
   while (!item) {
-    const chance = Math.floor(Math.random() * 100)
-    
-    items.forEach(elm => {
-      if (chance < elm.chance && !item) item = elm
-    })
+    const chance = Math.random() * totalChance;
+
+    let currentSum = 0;
+    for (const elm of items) {
+      if (excludeHighValue && (elm.name === '10000' || elm.name === '5000')) continue;
+      currentSum += elm.chance;
+      if (chance < currentSum) {
+        item = elm;
+        break;
+      }
+    }
   }
 
-  return item
+  return item;
 }
 
 function generateItems() {
@@ -37,13 +44,13 @@ function generateItems() {
   const list = document.querySelector('.list')
 
   for (let i = 0; i < cells; i++) {
-    const item = getItem()
+    const item = getItem(i === 50);
     
     const li = document.createElement('li')
     li.setAttribute('data-item', JSON.stringify(item))
     li.classList.add('list__item')
     li.innerHTML = `
-      <img src="${item.img}" alt="" />
+      <img src="${item.img}" alt="${item.name}" />
     `
 
     list.append(li)
